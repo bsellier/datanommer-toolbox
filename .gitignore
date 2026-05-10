@@ -1,0 +1,10 @@
+# Personnal utilities
+quick-dev-utils
+
+.venv
+.env
+
+# PostgreSQL data
+pg_data
+# CSV data
+datanommer_incremental_data
