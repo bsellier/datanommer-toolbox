@@ -30,6 +30,9 @@ print(dcon.sql("""
 print(dcon.sql("""
     select date(timestamp), count(1) as cnt from pgdb.messages group by 1 order by 2 desc;
 """))
+print(dcon.sql("""
+    select msg_json->>'date' from pgdb.messages limit 3;
+"""))
 dcon.sql(""" 
     DETACH pgdb;
 """)

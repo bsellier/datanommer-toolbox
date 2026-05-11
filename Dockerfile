@@ -1,4 +1,4 @@
-FROM timescale/timescaledb-ha:pg18.1-ts2.26.4-oss
+FROM timescale/timescaledb-ha:pg18-oss
 # FROM timescale/timescaledb:latest-pg18
 USER root
 
