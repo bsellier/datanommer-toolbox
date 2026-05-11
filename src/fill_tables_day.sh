@@ -15,6 +15,10 @@ else
 fi
 
 PATTERN=$1-datanommer-incremental
+
+# Add column for msg_json in CSV
+sed -i "s/$/,\"{}\"/" $DATA_DIR/$PATTERN/$1-messages.csv 
+sed -i "1 s/headers,\"{}\"/,headers,msg_json/" $DATA_DIR/$PATTERN/$1-messages.csv 
 # psql --username=postgres -d $DBNAME --command="COPY alembic_version FROM '$DATA_DIR/$PATTERN/$1-alembic_version.txt';"
 psql --username=postgres -d datanommer2 --command="COPY messages FROM '$DATA_DIR/$PATTERN/$1-messages.csv' CSV HEADER;"
 psql --username=postgres -d datanommer2 --command="COPY packages FROM '$DATA_DIR/$PATTERN/$1-packages.csv' CSV HEADER;"
