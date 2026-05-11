@@ -44,8 +44,14 @@ CREATE TABLE users_messages (
     msg_timestamp timestamp NOT NULL
 );
 
+
+
+--
+-- messages.msg_json
+--
+
 -- ALTER TABLE messages ADD COLUMN msg_json jsonb;
--- COMMENT ON COLUMN messages.msg_json IS 'Parsed from msg where possible';
+COMMENT ON COLUMN messages.msg_json IS 'Parsed from msg where possible';
 
 CREATE OR REPLACE FUNCTION hatlas_safe_text_to_jsonb(input_text text)
 RETURNS jsonb
@@ -94,3 +100,57 @@ BEFORE INSERT OR UPDATE OF msg
 ON messages
 FOR EACH ROW
 EXECUTE FUNCTION hatlas_msg_json_trigger();
+
+
+--
+-- messages.topic_ltree
+--
+CREATE EXTENSION IF NOT EXISTS ltree;
+
+ALTER TABLE messages ADD COLUMN topic_ltree ltree;
+COMMENT ON COLUMN messages.topic_ltree IS
+  'Generated from messages.topic, leading and trailing dots stripped, dashes -> underscores.';
+
+CREATE OR REPLACE FUNCTION hatlas_text_to_ltree(input text)
+RETURNS ltree
+LANGUAGE plpgsql
+IMMUTABLE
+LEAKPROOF
+RETURNS NULL ON NULL INPUT
+PARALLEL SAFE
+AS $$
+DECLARE
+    result text;
+BEGIN
+    result := replace(input, '-', '_');
+    -- strip leading/trailing dots
+    result := regexp_replace(result, '(^\.*|\.*$)', '', 'g');
+    result := nullif(result, '');
+    RETURN result::ltree;
+END;
+$$;
+-- topic_ltree triggers
+
+CREATE OR REPLACE FUNCTION hatlas_topic_ltree_trigger()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    NEW.topic_ltree := hatlas_text_to_ltree(NEW.topic);
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER hatlas_trg_sync_topic_ltree
+BEFORE INSERT OR UPDATE OF topic
+ON messages
+FOR EACH ROW
+EXECUTE FUNCTION hatlas_topic_ltree_trigger();
+
+
+-- topic_ltree indexes
+
+-- CREATE INDEX IF NOT EXISTS ix_messages_topic_ltree
+-- ON messages
+-- USING gist (topic_ltree)
+-- TABLESPACE pgfast;
