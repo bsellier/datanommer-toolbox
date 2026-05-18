@@ -1,5 +1,7 @@
 \connect datanommer2
 
+CREATE EXTENSION IF NOT EXISTS ltree;
+
 CREATE TABLE alembic_version (
     version_num varchar(32) NOT NULL
 );
@@ -19,7 +21,8 @@ CREATE TABLE messages (
     source_version varchar,
     msg text,
     headers text,
-    msg_json jsonb
+    msg_json jsonb,
+    topic_ltree ltree
 );
 
 CREATE TABLE packages (
@@ -105,9 +108,7 @@ EXECUTE FUNCTION hatlas_msg_json_trigger();
 --
 -- messages.topic_ltree
 --
-CREATE EXTENSION IF NOT EXISTS ltree;
 
-ALTER TABLE messages ADD COLUMN topic_ltree ltree;
 COMMENT ON COLUMN messages.topic_ltree IS
   'Generated from messages.topic, leading and trailing dots stripped, dashes -> underscores.';
 
