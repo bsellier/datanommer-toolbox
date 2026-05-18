@@ -47,3 +47,10 @@ sudo ./container-utils/clean.sh
 ```
 
 
+## Purpose
+
+datanommer-toolbox is meant to provide easy-acces tools to:
+- host a small replica of the datanommer2 database
+- download only the data you need
+- make it easy to create your first charts
+- (mirror ingestion processes for development and testing?)
